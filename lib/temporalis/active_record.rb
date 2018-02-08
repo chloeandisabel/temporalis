@@ -100,7 +100,7 @@ module Temporalis
           descendants.update_all(valid_until: timestamp)
           descendants_for_ancestors.update_all(valid_until: timestamp)
           temporalis_closure_class.import(columns, new_descendants_for_ancestors, validate: false)
-          with_key(key).update_all(valid_until: timestamp)
+          active_at(timestamp).with_key(key).update_all(valid_until: timestamp)
         end
       end
 
