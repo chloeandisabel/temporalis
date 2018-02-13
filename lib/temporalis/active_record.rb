@@ -45,7 +45,7 @@ module Temporalis
         end
 
         scope :with_key, -> (key) { where(key: key) }
-        scope :active_at, -> (timestamp) { where("valid_since < ? AND valid_until >= ?", timestamp, timestamp) }
+        scope :active_at, -> (timestamp) { where("valid_since <= ? AND valid_until > ?", timestamp, timestamp) }
       end
 
       def temporalis_add_node(timestamp, key, parent_key, valid_until: temporalis_end_of_time)
