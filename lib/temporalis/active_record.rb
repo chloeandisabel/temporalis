@@ -28,8 +28,6 @@ module Temporalis
 
       def temporalis_tree(closure_class_name: nil, closure_class: nil, use_unprefixed_aliases: true, end_of_time: Temporalis::END_OF_TIME_DEFAULT)
         @temporalis_closure_class = closure_class || (closure_class_name || "#{name}Closure").constantize
-        temporalis_closure_class.class_eval { include Temporalis::ActiveRecord::Closure }
-
         @temporalis_end_of_time = end_of_time
 
         if use_unprefixed_aliases

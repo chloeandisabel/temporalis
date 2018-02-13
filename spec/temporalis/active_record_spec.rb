@@ -44,6 +44,8 @@ describe Temporalis::ActiveRecord do
     Class.new(ActiveRecord::Base) do
       self.table_name = "temporalis_node_closures"
 
+      include Temporalis::ActiveRecord::Closure
+
       def self.name
         "TemporalisNodeClosure"
       end
