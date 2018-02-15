@@ -32,7 +32,7 @@ module Temporalis
 
         if use_unprefixed_aliases
           mod = Module.new do
-            [:ancestors, :descendants, :add_node, :implode_node, :change_parent].each do |method|
+            [:ancestors, :descendants, :add_node, :implode_node, :change_parent, :batch_add_nodes].each do |method|
               define_method(method) do |*args, &block|
                 public_send("temporalis_#{method}", *args, &block)
               end
@@ -47,7 +47,7 @@ module Temporalis
       end
 
       def temporalis_add_node(timestamp, key, parent_key, valid_until: temporalis_end_of_time)
-        raise ArgumentError, "node #{key} is already active at #{timestamp}" if active_at(timestamp).with_key(key).any?
+        fail ArgumentError, "node #{key} is already active at #{timestamp}" if active_at(timestamp).with_key(key).any?
 
         columns = [:ancestor, :descendant, :level, :valid_since, :valid_until]
         new_closures = temporalis_closure_class
@@ -63,6 +63,36 @@ module Temporalis
         transaction do
           create!(key: key, valid_since: timestamp, valid_until: valid_until)
           temporalis_closure_class.import(columns, new_closures, validate: false)
+        end
+      end
+
+      def temporalis_batch_add_nodes(timestamp, tuples, valid_until: temporalis_end_of_time)
+        tree = Util::Tree.new do |tree|
+          tuples.each do |key, parent_key|
+            tree.add_node(key, parent_key)
+          end
+        end
+
+        ancestors = {}
+        nodes = []
+        closures = []
+        tree.traverse do |node|
+          nodes << node
+          ancestors[node] = [*node.parent.key, *ancestors[node.parent]]
+          closures.concat ancestors[node].each_with_index.map { |parent_key, i| [parent_key, node.key, i + 1] }
+        end
+        transaction do
+          import(
+            [:key, :valid_since, :valid_until],
+            nodes.map { |node| [node.key, timestamp, valid_until] },
+            validate: false
+          )
+
+          temporalis_closure_class.import(
+            [:ancestor, :descendant, :level, :valid_since, :valid_until],
+            closures.map { |ancestor, descendant, level| [ancestor, descendant, level, timestamp, valid_until] },
+            validate: false
+          )
         end
       end
 

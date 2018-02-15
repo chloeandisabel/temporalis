@@ -264,6 +264,19 @@ describe Temporalis::ActiveRecord do
           expect(node.temporalis_descendants(timestamp, 121)).to match_array([])
         end
       end
+
+      describe ".temporalis_batch_add_nodes" do
+        let(:timestamp) { Time.current }
+        it "allows inserting multiple nodes in one query" do
+          node.temporalis_batch_add_nodes(timestamp, [[1, nil], [10, 1], [11, 1], [100, 10], [101, 10], [110, 11], [111, 11]])
+
+          expect(node.count).to eq(7)
+          expect(node.temporalis_ancestors(timestamp, 100)).to eq([10, 1])
+          expect(node.temporalis_ancestors(timestamp, 111)).to eq([11, 1])
+          expect(node.temporalis_descendants(timestamp, 1)).to match_array([10, 11, 100, 101, 110, 111])
+          expect(node.temporalis_descendants(timestamp, 10)).to match_array([100, 101])
+        end
+      end
     end
   end
 end
