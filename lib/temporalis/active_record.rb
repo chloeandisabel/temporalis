@@ -46,9 +46,10 @@ module Temporalis
         scope :active_at, -> (timestamp) { where("valid_since <= ? AND valid_until > ?", timestamp, timestamp) }
       end
 
-      def temporalis_add_node(timestamp, key, parent_key, valid_until: temporalis_end_of_time)
+      def temporalis_add_node(timestamp, key, parent_key, valid_until: nil)
         fail ArgumentError, "node #{key} is already active at #{timestamp}" if active_at(timestamp).with_key(key).any?
 
+        valid_until ||= temporalis_end_of_time
         columns = [:ancestor, :descendant, :level, :valid_since, :valid_until]
         new_closures = temporalis_closure_class
                         .ancestors_of(parent_key)
@@ -66,7 +67,9 @@ module Temporalis
         end
       end
 
-      def temporalis_batch_add_nodes(timestamp, tuples, valid_until: temporalis_end_of_time)
+      def temporalis_batch_add_nodes(timestamp, tuples, valid_until: nil)
+        valid_until ||= temporalis_end_of_time
+
         tree = Util::Tree.new do |tree|
           tuples.each do |key, parent_key|
             tree.add_node(key, parent_key)
