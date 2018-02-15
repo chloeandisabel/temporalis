@@ -13,3 +13,6 @@ env:
   - MYSQL_DATABASE_URL=mysql2://travis@localhost/temporalis_test POSTGRESQL_DATABASE_URL=postgresql://postgres@localhost/temporalis_test SQLITE3_DATABASE_URL="sqlite3::memory:" DATABASES_TO_TEST="sqlite3,mysql,postgresql"
 cache:
   - bundler
+notifications:
+  email:
+    - me@markabramov.me
