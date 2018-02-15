@@ -49,6 +49,7 @@ Node.descendants(t - 1.second, 100) # [101, 102]
 All the methods are always available in prefixed versions (`temporalis_add_node`), aliases without prefix are created for convenience.
 
 * `Node.add_node(timestamp, key, parent_key)` — adds a node to the tree
+* `Node.batch_add_nodes(timestamp, tuples)` — adds multiple nodes to the tree (tuples are `[key, parent_key]`, and expected to be sorted reasonably, so that you don't add a child before its parent); uses one batch query for insertion instead of multiple smaller ones
 * `Node.implode_node(timestamp, key)` — "implodes" a node (removes it from tree, attaches all children to the parent)
 * `Node.change_parent(timestamp, key, new_parent_key)` — moves a node
 * `Node.ancestors(timestamp, key)` — list of ancestor **keys**, from bottom to top
