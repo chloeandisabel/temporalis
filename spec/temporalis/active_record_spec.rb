@@ -263,6 +263,21 @@ describe Temporalis::ActiveRecord do
           expect(node.temporalis_descendants(timestamp, 120)).to match_array([])
           expect(node.temporalis_descendants(timestamp, 121)).to match_array([])
         end
+
+        it "allows scoping by level" do
+          node.temporalis_add_node(timestamp, 100, nil)
+          node.temporalis_add_node(timestamp, 101, 100)
+          node.temporalis_add_node(timestamp, 102, 100)
+          node.temporalis_add_node(timestamp, 110, 101)
+          node.temporalis_add_node(timestamp, 111, 101)
+          node.temporalis_add_node(timestamp, 120, 102)
+          node.temporalis_add_node(timestamp, 121, 102)
+
+          expect(node.temporalis_descendants(timestamp, 100, 1)).to match_array([101, 102])
+          expect(node.temporalis_descendants(timestamp, 101, 1)).to match_array([110, 111])
+          expect(node.temporalis_ancestors(timestamp, 101, 1)).to eq([100])
+          expect(node.temporalis_ancestors(timestamp, 111, 1)).to eq([101])
+        end
       end
 
       describe ".temporalis_batch_add_nodes" do

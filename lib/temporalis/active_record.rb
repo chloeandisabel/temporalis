@@ -19,6 +19,10 @@ module Temporalis
           scope :ancestors_of, -> (key) {
             where(descendant: key)
           }
+
+          scope :with_level, -> (level) {
+            level ? where(level: level) : all
+          }
         end
       end
     end
@@ -183,18 +187,20 @@ module Temporalis
         end
       end
 
-      def temporalis_ancestors(timestamp, key)
+      def temporalis_ancestors(timestamp, key, level = nil)
         temporalis_closure_class
           .ancestors_of(key)
           .active_at(timestamp)
+          .with_level(level)
           .order(:level)
           .pluck(:ancestor)
       end
 
-      def temporalis_descendants(timestamp, key)
+      def temporalis_descendants(timestamp, key, level = nil)
         temporalis_closure_class
           .descendants_of(key)
           .active_at(timestamp)
+          .with_level(level)
           .pluck(:descendant)
       end
     end
