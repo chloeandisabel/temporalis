@@ -9,7 +9,7 @@ module Temporalis
       def self.included(receiver)
         receiver.class_eval do
           scope :active_at, -> (timestamp) {
-            where("valid_since <= ? AND valid_until > ?", timestamp, timestamp)
+            where(arel_table[:valid_since].lteq(timestamp)).where(arel_table[:valid_until].gt(timestamp))
           }
 
           scope :descendants_of, -> (key) {
